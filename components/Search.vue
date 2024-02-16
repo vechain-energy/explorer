@@ -14,7 +14,7 @@
         ref="input-search"
         autocomplete="off"
         v-model.trim="search"
-        placeholder="Account/TxID/Block#/Token"
+        placeholder="Account/TxID/Block#/Token/name.vet"
       ></b-form-input>
       <b-input-group-append>
         <b-button

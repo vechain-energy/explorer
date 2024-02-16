@@ -10,14 +10,17 @@
               }}"
         >
             <template v-if="!!short">
+                <span v-if="vetName">{{vetName}}</span>
                 <small
                     ref="address-short"
-                    v-if="this.size === 'sm'"
-                >{{address | toChecksumAddress | shortAddress}}</small>
-                <span ref="address-short" v-else>{{address | toChecksumAddress | shortAddress}}</span>
+                    v-else-if="this.size === 'sm'"
+                 >{{address | toChecksumAddress | shortAddress}}
+                 </small>
+                 <span ref="address-short" v-else>{{address | toChecksumAddress | shortAddress}}</span>
             </template>
             <template v-else>
-                <small v-if="this.size === 'sm'">{{address | toChecksumAddress}}</small>
+                <small v-if="vetName">{{vetName}}</small>
+                <small v-else-if="this.size === 'sm'">{{address | toChecksumAddress}}</small>
                 <span v-else>{{address | toChecksumAddress}}</span>
             </template>
         </nuxt-link>
@@ -25,14 +28,21 @@
     </div>
 </template>
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 import IdentBox from '@/components/IdentBox.vue'
+import { Context } from '@nuxt/types'
 @Component({
     components: {
         IdentBox
+    },
+    fetchOnServer: false,
+    fetch() {
+        this.queryChange();
     }
 })
 export default class AccountLink extends Vue {
+    vetName: string | null = null
+
     @Prop()
     size!: 'sm' | 'normal' | null
 
@@ -53,5 +63,10 @@ export default class AccountLink extends Vue {
     get style() {
         return this.sizes['sm']
     }
+
+    async queryChange() {
+        const vetName = await this.$svc.vetAddress(this.address);
+        this.vetName = vetName || null;
+    }  
 }
 </script>

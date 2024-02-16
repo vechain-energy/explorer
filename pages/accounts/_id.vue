@@ -5,7 +5,12 @@
                 <h3 class="d-inline-block mr-3">{{ title }}</h3>
                 <h5
                     class="text-secondary d-inline-block"
-                >{{ account.address | toChecksumAddress | shortAddress }}</h5>
+                    v-if="vetName"
+                >{{vetName}}</h5>
+                <h5
+                    class="text-secondary d-inline-block"
+                    v-else
+                >{{account.address | toChecksumAddress | shortAddress}}</h5>
             </div>
             <h6>
                 <b-badge v-if="extraInfo" pill variant="info">{{ extraInfo.symbol}}</b-badge>
@@ -49,9 +54,11 @@ import { Context } from '@nuxt/types'
     async asyncData(ctx: Context) {
         const params = ctx.params
         const result = await ctx.$svc.account(ctx.params.id)
+        const vetName = await ctx.$svc.vetAddress(ctx.params.id)
         let tokenList = ctx.store.state.tokens
         return {
             detail: result,
+            vetName,
             tokenList,
             params
         }
@@ -61,6 +68,7 @@ export default class Account extends Vue {
     detail: DTO.AccountDetail | null = null
     tokenList: DTO.Token[] | null = null
     params: any = null
+    vetName: string = ''
 
     // by tokenList
     get extraInfo() {

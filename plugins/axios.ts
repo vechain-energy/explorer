@@ -33,6 +33,8 @@ interface IfcSvc {
   tokens(): Promise<DTO.Token[]>
   price(): Promise<DTO.Price | null>
   account(addr: string): Promise<DTO.AccountDetail>
+  vetName(name: string): Promise<string>
+  vetAddress(address: string): Promise<string>
   summary(): Promise<{
     status: DTO.Status,
     blocks: DTO.BlockSummary[],
@@ -74,6 +76,21 @@ class Svc implements IfcSvc {
 
   async tx(id: string): Promise<DTO.TxDetail> {
     return await this.axios.$get(`/api/transactions/${id.toLowerCase()}`)
+  }
+
+  async vetName(name: string): Promise<string> {
+    return await this.axios.get(`https://vet.domains/api/lookup/name/${encodeURIComponent(name)}`).then((res) => {
+      return res.data.address
+    })
+  }
+
+  async vetAddress(address: string): Promise<string> {
+    return await this.axios.get(`https://api.vechain.energy/v1/call/main/0xA11413086e163e41901bb81fdc5617c975Fa5a1A/getNames(address%5B%5D%20${encodeURIComponent(address)})%20external%20view%20returns%20(string%5B%5D%20names)`)
+      .catch(() => { return '' })
+      .then((res: any) => {
+        if (Array.isArray(res.data) && res.data[0]) { return res.data[0] }
+        return ''
+      })
   }
 
   async tokens(): Promise<DTO.Token[]> {
@@ -199,7 +216,13 @@ class Svc implements IfcSvc {
           rt = { name: 'transactions-id', params: { id: txDetail.tx.txID }, hash: '#info' }
         }
       }
+    } else if (/\./.test(search) && (process.env['current'] || '').toLowerCase() === 'mainnet') {
+      const address = await this.vetName(search)
+      if (address) {
+        rt = { name: 'accounts-id', params: { id: address.toLowerCase() } }
+      }
     }
+
 
     return rt
   }

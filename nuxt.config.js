@@ -10,12 +10,15 @@ const title = IS_MAIN ? '' : '(Test)'
 const Version = process.env.COMMIT_REV
 
 export default {
+  typescript: {
+    typeCheck: false
+  },
   server: {
     host: '0.0.0.0'
   },
   serverMiddleware: [
     { path: '/', handler: morgan('tiny') },
-    { path: '/api/export', handler: '~/server/captcha.js'}
+    { path: '/api/export', handler: '~/server/captcha.js' }
   ],
   mode: 'universal',
   /*
@@ -195,7 +198,7 @@ export default {
   proxy: {
     '/api': {
       target: process.env['API_URL'],
-      agent: process.env['API_URL'].startsWith('http://') ? new http.Agent({keepAlive: true}) : process.env['API_URL'].startsWith('https://') ? new https.Agent({keepAlive: true}) : undefined
+      agent: process.env['API_URL'].startsWith('http://') ? new http.Agent({ keepAlive: true }) : process.env['API_URL'].startsWith('https://') ? new https.Agent({ keepAlive: true }) : undefined
     }
   },
   env: {
